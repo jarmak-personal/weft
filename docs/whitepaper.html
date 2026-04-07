@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Weft whitepaper: an adaptive-basis image codec. Full technical write-up of the core idea, bases, benchmark methodology, and results.">
+  <title>Weft Whitepaper — Adaptive-Basis Image Codec</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="paper.css">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark">⧖</span>
+        <span class="brand-name">weft</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Overview</a></li>
+        <li><a href="index.html#gallery">Gallery</a></li>
+        <li><a href="index.html#results">Results</a></li>
+        <li><a href="whitepaper.html">Whitepaper</a></li>
+        <li><a href="WEFT_SPEC.md">Spec ↗</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="paper-header">
+    <div class="wrap narrow">
+      <div class="eyebrow">whitepaper</div>
+      <h1 class="paper-title">Weft: An Adaptive-Basis Image Codec</h1>
+      <p class="paper-meta">Tech-exploration whitepaper &middot; April 2026</p>
+    </div>
+  </header>
+
+  <main class="paper-body">
+    <div class="wrap narrow">
+      <article id="paper-content" class="paper-content">
+        <div class="paper-loading">Loading whitepaper…</div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-brand">weft</div>
+          <p class="footer-tagline">adaptive-basis image codec</p>
+        </div>
+        <div class="footer-col">
+          <h4>Read</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="WEFT_SPEC.md">Bitstream spec</a></li>
+            <li><a href="EXPERIMENTS.md">Experiments harness</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Source</h4>
+          <ul>
+            <li><a href="WEFT_WHITEPAPER.md">Raw markdown</a></li>
+            <li><a href="../scripts/whitepaper_bench.py">Benchmark script</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>Tech exploration. Not a production codec.</p>
+        <p class="footer-meta">Previously called RTIC.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script>
+    (async function () {
+      const target = document.getElementById("paper-content");
+      try {
+        const res = await fetch("WEFT_WHITEPAPER.md");
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const md = await res.text();
+        // Drop the first h1 — it's already rendered in the header
+        const withoutH1 = md.replace(/^#\s+.+\n/, "");
+        target.innerHTML = marked.parse(withoutH1, { gfm: true });
+      } catch (e) {
+        target.innerHTML =
+          '<p>Could not load <code>WEFT_WHITEPAPER.md</code>. ' +
+          'If you are opening this file directly from disk, run ' +
+          '<code>python -m http.server</code> from the <code>docs/</code> ' +
+          'directory and visit <code>http://localhost:8000/whitepaper.html</code>. ' +
+          'You can also read the raw markdown source ' +
+          '<a href="WEFT_WHITEPAPER.md">here</a>.</p>';
+      }
+    })();
+  </script>
+</body>
+</html>

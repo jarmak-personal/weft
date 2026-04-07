@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Weft: an adaptive-basis image codec. Different representation per tile. Wins iso-bytes vs JPEG/WebP on structured content.">
+  <meta property="og:title" content="Weft — Adaptive-Basis Image Codec">
+  <meta property="og:description" content="Different representation per tile: primitive stack, palette, bicubic patch, gradient field, DCT residual. Wins 10/14 vs JPEG at iso-bytes with +11.6 dB average delta.">
+  <meta property="og:type" content="article">
+  <title>Weft — Adaptive-Basis Image Codec</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="#top" class="brand">
+        <span class="brand-mark">⧖</span>
+        <span class="brand-name">weft</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#idea">Idea</a></li>
+        <li><a href="#bases">Bases</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#limits">Limits</a></li>
+        <li><a href="whitepaper.html">Whitepaper ↗</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header id="top" class="hero">
+    <div class="wrap">
+      <div class="eyebrow">adaptive-basis image codec</div>
+      <h1 class="hero-title">
+        Different representation<br>
+        for every tile.
+      </h1>
+      <p class="hero-subtitle">
+        Weft picks a different basis &mdash; primitive stack, bicubic patch,
+        palette, gradient field, or DCT residual &mdash; for each tile of an
+        image under a rate-distortion tournament, then writes only the winner.
+      </p>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num" id="stat-wins">10<span class="stat-div">/</span>14</div>
+          <div class="stat-label">iso-byte wins vs JPEG</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-avg-delta">+11.63 dB</div>
+          <div class="stat-label">avg PSNR delta vs JPEG</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-weft-total">243 KB</div>
+          <div class="stat-label">total on 14-fixture corpus</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-png-ratio">5.2×</div>
+          <div class="stat-label">smaller than PNG lossless</div>
+        </div>
+      </div>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#gallery">See the comparisons</a>
+        <a class="btn btn-ghost" href="whitepaper.html">Read the whitepaper</a>
+      </div>
+    </div>
+  </header>
+
+  <section id="idea" class="section">
+    <div class="wrap narrow">
+      <h2 class="section-title">Why another image codec?</h2>
+      <p>
+        JPEG, WebP, AVIF, and JPEG XL share one architectural choice: one basis
+        representation, applied uniformly to every pixel of every image. JPEG
+        transforms 8×8 blocks of every image with DCT. AVIF uses a stack of
+        related linear transforms. It's mathematically clean and engineering-
+        efficient, and it's why these codecs are deployed on every device.
+      </p>
+      <p>
+        But it means that on content far from natural-photo statistics, the
+        codec is doing the wrong thing. A 256-color pixel-art icon compressed
+        with JPEG produces ringing on every edge. A page of vector diagrams
+        compressed with WebP-lossless rounds the strokes into noise patterns. A
+        pure smooth gradient in PNG occupies thousands of bytes for what is
+        essentially a single bicubic patch's worth of information.
+      </p>
+      <p>
+        The right answer for each of those is well-known: palette codecs for
+        pixel art, vector formats for diagrams, smooth-function approximations
+        for gradients. The problem is that real images aren't <em>one</em> of
+        those things &mdash; they're a mix, often within the same image. A
+        screenshot has UI chrome (palette), text (palette + edges), photographs
+        (DCT), and gradient backgrounds (smooth). Using one codec for the whole
+        thing leaves a lot on the table.
+      </p>
+      <p>
+        <strong>Weft is what happens if you say: what if the codec picked the
+        right representation per tile?</strong>
+      </p>
+    </div>
+  </section>
+
+  <section id="bases" class="section section-bases">
+    <div class="wrap">
+      <h2 class="section-title">The five bases</h2>
+      <p class="section-lede">
+        For every tile, the encoder fits each of these candidates and scores by
+        <code>PSNR &minus; &lambda;&middot;BPP</code>. The winner gets written to
+        the bitstream; the decoder dispatches on the block type.
+      </p>
+
+      <div class="bases-grid">
+        <article class="basis-card">
+          <div class="basis-num">01</div>
+          <h3>Primitive stack</h3>
+          <p>
+            Analytic shapes composited per tile: constant patches, linear
+            gradients, lines, quadratic Bézier curves, triangles, bicubic
+            Bernstein patches. Variable-length. The encoder runs a greedy
+            primitive search to find the smallest set that reconstructs the tile
+            to a target error.
+          </p>
+          <div class="basis-tag">best for: mixed content, analytic shapes</div>
+        </article>
+
+        <article class="basis-card">
+          <div class="basis-num">02</div>
+          <h3>Per-tile bicubic</h3>
+          <p>
+            A single 4×4 Bernstein control grid replacing a primitive stack for
+            tiles dominated by smooth content. 48 bytes per tile. Fit by one
+            matrix solve &mdash; no iteration. Picked by the hybrid variant's
+            per-tile R-D check when smoothness beats a primitive search.
+          </p>
+          <div class="basis-tag">best for: smooth gradients inside mixed images</div>
+        </article>
+
+        <article class="basis-card">
+          <div class="basis-num">03</div>
+          <h3>Palette + labels</h3>
+          <p>
+            A <em>K</em>-color palette (<em>K</em> = 16 or 64) plus a per-pixel
+            label grid. K-means clustered in linear RGB. Decoder is one
+            <code>palette[labels]</code> lookup. Lossless when the source image
+            only uses <em>K</em> distinct colors; scales via nearest-neighbor
+            with zero interpolation blur.
+          </p>
+          <div class="basis-tag">best for: pixel art, icons, diagrams, screenshots</div>
+        </article>
+
+        <article class="basis-card">
+          <div class="basis-num">04</div>
+          <h3>Gradient field</h3>
+          <p>
+            Stores <code>∂I/∂x</code> and <code>∂I/∂y</code> quantized to int8
+            per channel plus per-channel means. Decoder solves the Poisson
+            equation via a closed-form DCT-II decomposition &mdash; O(N log N)
+            per channel. Wins on content where the <em>gradient field</em> is
+            locally simple even when the image isn't.
+          </p>
+          <div class="basis-tag">best for: diagrams, charts, region maps</div>
+        </article>
+
+        <article class="basis-card">
+          <div class="basis-num">05</div>
+          <h3>DCT residual layer</h3>
+          <p>
+            A JPEG-style frequency-domain residual added <em>on top</em> of any
+            of the other bases. YCbCr 4:2:0, per-tile presence bitmask,
+            per-frequency quantization weighting. Closes the natural-photo PSNR
+            gap when the primitive bases plateau.
+          </p>
+          <div class="basis-tag">best for: dense natural texture (stacked on a primitive basis)</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery" class="section section-dark">
+    <div class="wrap">
+      <h2 class="section-title">See it for yourself</h2>
+      <p class="section-lede">
+        Drag the slider on each image to compare the Weft reconstruction
+        against JPEG at the same byte budget. Every pair is rendered from the
+        committed corpus; the full reproduction is <code>python scripts/generate_site_assets.py</code>.
+      </p>
+
+      <div id="gallery-grid" class="gallery-grid">
+        <div class="gallery-loading">Loading comparisons…</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="results" class="section">
+    <div class="wrap">
+      <h2 class="section-title">Full benchmark</h2>
+      <p class="section-lede">
+        Every fixture in the committed corpus, quality 75 auto-select. JPEG and
+        WebP are matched to Weft's byte count via binary search on their quality
+        parameter (iso-bytes protocol).
+      </p>
+      <div class="table-wrap">
+        <table class="bench-table" id="bench-table">
+          <thead>
+            <tr>
+              <th class="col-name">Fixture</th>
+              <th class="col-right">Weft KB</th>
+              <th class="col-right">Weft dB</th>
+              <th class="col-right">JPEG dB</th>
+              <th class="col-right">Δ dB</th>
+              <th class="col-name">Variant</th>
+            </tr>
+          </thead>
+          <tbody id="bench-tbody">
+            <tr><td colspan="6" class="tbody-loading">Loading…</td></tr>
+          </tbody>
+          <tfoot>
+            <tr id="bench-tfoot">
+              <td class="col-name"><strong>AGGREGATE</strong></td>
+              <td class="col-right" id="tfoot-bytes">—</td>
+              <td class="col-right" id="tfoot-weft-db">—</td>
+              <td class="col-right" id="tfoot-jpeg-db">—</td>
+              <td class="col-right" id="tfoot-delta">—</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="limits" class="section">
+    <div class="wrap narrow">
+      <h2 class="section-title">What Weft is not</h2>
+      <ul class="limits-list">
+        <li><strong>Not faster to decode than libjpeg-turbo.</strong> The CPU decoder is roughly 2-10× slower than libjpeg-turbo at the same output size. A GPU primitive decode kernel exists and is bit-exact but doesn't change the answer &mdash; per-call CUDA memory overhead dominates at practical scales. We measured it; the hypothesis came back partial.</li>
+        <li><strong>Not competitive on dense natural texture.</strong> On <code>synth-noise-texture</code> (pure Perlin-like noise), Weft loses to JPEG by 5 dB. Pure noise is JPEG's home court &mdash; DCT quantization is locally optimal for high-entropy frequency content, and we make no claim to beat it there.</li>
+        <li><strong>Not a production codec.</strong> The bitstream format may break between minor versions without notice. The encoder is slow (auto-select runs 8 candidate encodings per image). There's no error correction, no streaming framing, no conformance suite. Don't put valuable images in <code>.weft</code> files.</li>
+        <li><strong>Not a neural codec.</strong> Weft is a classical hand-built codec. Modern neural codecs and ESRGAN-style upscalers will beat it on natural-texture reconstruction, especially at extreme scales.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="reproduce" class="section section-dark">
+    <div class="wrap narrow">
+      <h2 class="section-title">Reproduce it yourself</h2>
+      <p>
+        Everything on this page is reproducible from the repo with no external
+        datasets. The synthetic corpus is deterministic; the encoder is
+        deterministic; the benchmark protocol is a binary search over JPEG
+        quality at iso-bytes.
+      </p>
+      <pre class="code-block"><code># 1. Install
+pip install -e .
+
+# 2. (optional) regenerate the synthetic corpus
+python samples/inputs/_generate.py
+
+# 3. Run the benchmark (numbers + CSV + summary.json)
+python scripts/whitepaper_bench.py
+
+# 4. Rebuild the site assets (images + bench_data.json)
+python scripts/generate_site_assets.py</code></pre>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-brand">weft</div>
+          <p class="footer-tagline">adaptive-basis image codec</p>
+        </div>
+        <div class="footer-col">
+          <h4>Read</h4>
+          <ul>
+            <li><a href="whitepaper.html">Whitepaper</a></li>
+            <li><a href="WEFT_SPEC.md">Bitstream spec</a></li>
+            <li><a href="EXPERIMENTS.md">Experiments harness</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Code</h4>
+          <ul>
+            <li><a href="https://github.com/">Source on GitHub</a></li>
+            <li><a href="../scripts/whitepaper_bench.py">Benchmark script</a></li>
+            <li><a href="../scripts/generate_site_assets.py">Site asset script</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>Tech exploration. Not a production codec. Don't put valuable images in <code>.weft</code> files.</p>
+        <p class="footer-meta">Previously called RTIC. Rename tracked in the whitepaper's appendix.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

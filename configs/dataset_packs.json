@@ -1,0 +1,9 @@
+{
+  "packs": {
+    "text_ui": "text_ui",
+    "natural": "natural",
+    "synthetic_edges": "synthetic_edges",
+    "anime_flat": "anime_flat",
+    "noisy": "noisy"
+  }
+}

@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "weft"
+version = "0.1.0"
+description = "Weft: adaptive-basis image codec (per-tile primitive/bicubic/palette/gradient/DCT selection)"
+readme = "README.md"
+authors = [{name = "Weft Authors"}]
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "Pillow>=10.0",
+]
+
+[project.optional-dependencies]
+gpu = [
+  "cuda-python>=12.0",
+  "rmm-cu12>=26.0",
+]
+bench = [
+  "scikit-image>=0.22",
+  "torch>=2.2",
+  "lpips>=0.1.4",
+]
+
+[project.scripts]
+weft = "weft.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

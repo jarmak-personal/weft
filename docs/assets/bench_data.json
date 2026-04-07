@@ -1,0 +1,351 @@
+{
+  "weft_quality": 75,
+  "fixture_count": 14,
+  "wins_jpeg": 10,
+  "avg_weft_psnr_db": 43.75,
+  "avg_jpeg_psnr_iso_db": 32.12,
+  "avg_delta_db_vs_jpeg": 11.63,
+  "totals_kb": {
+    "weft": 243.0,
+    "jpeg_iso": 240.4,
+    "png_lossless": 1259.8
+  },
+  "fixtures": [
+    {
+      "name": "hard-edges",
+      "title": "Hard edges",
+      "note": "Scanned-document style hard-edge content with text and geometric shapes. Palette-64 wins by capturing the discrete color structure.",
+      "width": 1024,
+      "height": 768,
+      "variant": "palette-64",
+      "source_bytes": 43965,
+      "weft": {
+        "bytes": 11871,
+        "psnr_db": 43.57
+      },
+      "jpeg_iso": {
+        "bytes": 10609,
+        "psnr_db": 25.45,
+        "quality": 5
+      },
+      "delta_db": 18.12,
+      "assets": {
+        "source": "assets/compare/hard-edges_source.png",
+        "weft": "assets/compare/hard-edges_weft.png",
+        "jpeg": "assets/compare/hard-edges_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-chart",
+      "title": "Line chart",
+      "note": "Vector-rendered line chart with grid, axes, data points, labels. Palette captures the discrete colors; JPEG rings at every edge.",
+      "width": 640,
+      "height": 480,
+      "variant": "palette-64",
+      "source_bytes": 12582,
+      "weft": {
+        "bytes": 6813,
+        "psnr_db": 47.65
+      },
+      "jpeg_iso": {
+        "bytes": 6654,
+        "psnr_db": 26.76,
+        "quality": 9
+      },
+      "delta_db": 20.89,
+      "assets": {
+        "source": "assets/compare/synth-chart_source.png",
+        "weft": "assets/compare/synth-chart_weft.png",
+        "jpeg": "assets/compare/synth-chart_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-diagram",
+      "title": "Flowchart diagram",
+      "note": "Axis-aligned arrows and discrete-fill boxes \u2014 pure vector-art content. Palette-16 fits in 2.2 KB.",
+      "width": 720,
+      "height": 480,
+      "variant": "palette-16",
+      "source_bytes": 2123,
+      "weft": {
+        "bytes": 2269,
+        "psnr_db": 47.97
+      },
+      "jpeg_iso": {
+        "bytes": 3329,
+        "psnr_db": 25.16,
+        "quality": 1
+      },
+      "delta_db": 22.81,
+      "assets": {
+        "source": "assets/compare/synth-diagram_source.png",
+        "weft": "assets/compare/synth-diagram_weft.png",
+        "jpeg": "assets/compare/synth-diagram_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-icons",
+      "title": "Icon grid",
+      "note": "4\u00d74 grid of 64\u00d764 icons with discrete colors and hard edges. Gradient field wins by capturing the large flat regions + sharp boundaries cheaply.",
+      "width": 336,
+      "height": 336,
+      "variant": "gradient",
+      "source_bytes": 3482,
+      "weft": {
+        "bytes": 5014,
+        "psnr_db": 47.8
+      },
+      "jpeg_iso": {
+        "bytes": 4968,
+        "psnr_db": 26.76,
+        "quality": 16
+      },
+      "delta_db": 21.05,
+      "assets": {
+        "source": "assets/compare/synth-icons_source.png",
+        "weft": "assets/compare/synth-icons_weft.png",
+        "jpeg": "assets/compare/synth-icons_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-mandelbrot",
+      "title": "Mandelbrot set",
+      "note": "Mandelbrot fractal with cyclic color mapping. Palette-64 captures the color cycling; absolute PSNR is modest because the detailed boundary region is structurally hard.",
+      "width": 512,
+      "height": 512,
+      "variant": "palette-64",
+      "source_bytes": 129601,
+      "weft": {
+        "bytes": 15261,
+        "psnr_db": 27.05
+      },
+      "jpeg_iso": {
+        "bytes": 15017,
+        "psnr_db": 24.1,
+        "quality": 51
+      },
+      "delta_db": 2.94,
+      "assets": {
+        "source": "assets/compare/synth-mandelbrot_source.png",
+        "weft": "assets/compare/synth-mandelbrot_weft.png",
+        "jpeg": "assets/compare/synth-mandelbrot_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-noise-texture",
+      "title": "Band-pass noise",
+      "note": "Perlin-like band-pass-filtered Gaussian noise. This is JPEG's home court \u2014 DCT quantization is locally optimal for high-entropy frequency content. Weft loses by ~5 dB.",
+      "width": 512,
+      "height": 512,
+      "variant": "hybrid-dct-tight",
+      "source_bytes": 257853,
+      "weft": {
+        "bytes": 49579,
+        "psnr_db": 39.16
+      },
+      "jpeg_iso": {
+        "bytes": 48798,
+        "psnr_db": 44.49,
+        "quality": 89
+      },
+      "delta_db": -5.33,
+      "assets": {
+        "source": "assets/compare/synth-noise-texture_source.png",
+        "weft": "assets/compare/synth-noise-texture_weft.png",
+        "jpeg": "assets/compare/synth-noise-texture_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-photo-landscape",
+      "title": "Synthetic landscape",
+      "note": "Gradient sky + gradient ground + sun + mountain. Mixed smooth/structural content; hybrid-dct-tight picks up the primitive layer with DCT on top.",
+      "width": 768,
+      "height": 512,
+      "variant": "hybrid-dct-tight",
+      "source_bytes": 20885,
+      "weft": {
+        "bytes": 14952,
+        "psnr_db": 41.24
+      },
+      "jpeg_iso": {
+        "bytes": 14605,
+        "psnr_db": 42.91,
+        "quality": 85
+      },
+      "delta_db": -1.67,
+      "assets": {
+        "source": "assets/compare/synth-photo-landscape_source.png",
+        "weft": "assets/compare/synth-photo-landscape_weft.png",
+        "jpeg": "assets/compare/synth-photo-landscape_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-photo-natural",
+      "title": "Natural photo proxy",
+      "note": "Multi-octave correlated noise approximating natural photo statistics. Weft matches JPEG within 0.5 dB here \u2014 close but not a win.",
+      "width": 768,
+      "height": 512,
+      "variant": "hybrid-dct-tight",
+      "source_bytes": 568728,
+      "weft": {
+        "bytes": 77029,
+        "psnr_db": 33.29
+      },
+      "jpeg_iso": {
+        "bytes": 76070,
+        "psnr_db": 33.77,
+        "quality": 85
+      },
+      "delta_db": -0.49,
+      "assets": {
+        "source": "assets/compare/synth-photo-natural_source.png",
+        "weft": "assets/compare/synth-photo-natural_weft.png",
+        "jpeg": "assets/compare/synth-photo-natural_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-pixel-sprite",
+      "title": "Pixel art sprite",
+      "note": "Tiled 16\u00d716 pixel-art sprite scaled up. Gradient field captures the discrete pixel boundaries in 3 KB.",
+      "width": 928,
+      "height": 928,
+      "variant": "gradient",
+      "source_bytes": 4819,
+      "weft": {
+        "bytes": 3097,
+        "psnr_db": 42.76
+      },
+      "jpeg_iso": {
+        "bytes": 8113,
+        "psnr_db": 23.71,
+        "quality": 1
+      },
+      "delta_db": 19.05,
+      "assets": {
+        "source": "assets/compare/synth-pixel-sprite_source.png",
+        "weft": "assets/compare/synth-pixel-sprite_weft.png",
+        "jpeg": "assets/compare/synth-pixel-sprite_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-region-map",
+      "title": "Region map",
+      "note": "Choropleth-style discrete-color region map. Palette-16 captures everything in 2.3 KB \u2014 JPEG at the same budget can't resolve the boundaries.",
+      "width": 640,
+      "height": 480,
+      "variant": "palette-16",
+      "source_bytes": 2111,
+      "weft": {
+        "bytes": 2333,
+        "psnr_db": 48.12
+      },
+      "jpeg_iso": {
+        "bytes": 3089,
+        "psnr_db": 22.81,
+        "quality": 1
+      },
+      "delta_db": 25.31,
+      "assets": {
+        "source": "assets/compare/synth-region-map_source.png",
+        "weft": "assets/compare/synth-region-map_weft.png",
+        "jpeg": "assets/compare/synth-region-map_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-shapes",
+      "title": "Geometric shapes",
+      "note": "Solid-fill circles, rectangles, triangles with hard edges. Gradient field wins; JPEG rings every boundary.",
+      "width": 512,
+      "height": 512,
+      "variant": "gradient",
+      "source_bytes": 4186,
+      "weft": {
+        "bytes": 8151,
+        "psnr_db": 48.6
+      },
+      "jpeg_iso": {
+        "bytes": 8079,
+        "psnr_db": 29.96,
+        "quality": 25
+      },
+      "delta_db": 18.65,
+      "assets": {
+        "source": "assets/compare/synth-shapes_source.png",
+        "weft": "assets/compare/synth-shapes_weft.png",
+        "jpeg": "assets/compare/synth-shapes_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-smooth-gradient",
+      "title": "Smooth gradient",
+      "note": "Pure radial + linear gradients, no hard edges. Bicubic wins \u2014 a single 4\u00d74 control grid per tile captures smooth content almost perfectly.",
+      "width": 512,
+      "height": 512,
+      "variant": "bicubic",
+      "source_bytes": 99439,
+      "weft": {
+        "bytes": 13012,
+        "psnr_db": 49.47
+      },
+      "jpeg_iso": {
+        "bytes": 12242,
+        "psnr_db": 49.7,
+        "quality": 89
+      },
+      "delta_db": -0.23,
+      "assets": {
+        "source": "assets/compare/synth-smooth-gradient_source.png",
+        "weft": "assets/compare/synth-smooth-gradient_weft.png",
+        "jpeg": "assets/compare/synth-smooth-gradient_jpeg.png"
+      }
+    },
+    {
+      "name": "synth-terminal",
+      "title": "Terminal screen",
+      "note": "Bitmap-font text on discrete palette colors, like a terminal session. Gradient field handles the hard glyph edges better than DCT ringing.",
+      "width": 720,
+      "height": 432,
+      "variant": "gradient",
+      "source_bytes": 5401,
+      "weft": {
+        "bytes": 8728,
+        "psnr_db": 49.52
+      },
+      "jpeg_iso": {
+        "bytes": 8602,
+        "psnr_db": 29.06,
+        "quality": 23
+      },
+      "delta_db": 20.47,
+      "assets": {
+        "source": "assets/compare/synth-terminal_source.png",
+        "weft": "assets/compare/synth-terminal_weft.png",
+        "jpeg": "assets/compare/synth-terminal_jpeg.png"
+      }
+    },
+    {
+      "name": "synthetic-render-1024",
+      "title": "Rendered scene",
+      "note": "Synthetic rendered scene with mixed smooth and structural features. Hybrid-dct-tight wins narrowly; primitive layer + DCT residual cover both regimes.",
+      "width": 1024,
+      "height": 1024,
+      "variant": "hybrid-dct-tight",
+      "source_bytes": 134904,
+      "weft": {
+        "bytes": 30768,
+        "psnr_db": 46.28
+      },
+      "jpeg_iso": {
+        "bytes": 25990,
+        "psnr_db": 44.98,
+        "quality": 89
+      },
+      "delta_db": 1.29,
+      "assets": {
+        "source": "assets/compare/synthetic-render-1024_source.png",
+        "weft": "assets/compare/synthetic-render-1024_weft.png",
+        "jpeg": "assets/compare/synthetic-render-1024_jpeg.png"
+      }
+    }
+  ]
+}
