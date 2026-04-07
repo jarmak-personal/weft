@@ -179,10 +179,25 @@
     <div class="wrap">
       <h2 class="section-title">See it for yourself</h2>
       <p class="section-lede">
-        Drag the slider on each image to compare the Weft reconstruction
-        against JPEG at the same byte budget. Every pair is rendered from the
-        committed corpus; the full reproduction is <code>python scripts/generate_site_assets.py</code>.
+        Drag the slider on each image to compare the Weft reconstruction against another codec
+        at the same byte budget. Every pair is rendered from the committed corpus; the full
+        reproduction is <code>python scripts/generate_site_assets.py</code>.
       </p>
+
+      <div class="gallery-toggle-wrap">
+        <span class="gallery-toggle-label">Compare against</span>
+        <div class="gallery-toggle" role="radiogroup" aria-label="Comparison codec">
+          <button class="toggle-btn active" data-mode="jpeg" role="radio" aria-checked="true">
+            JPEG <span class="toggle-sub">iso-bytes</span>
+          </button>
+          <button class="toggle-btn" data-mode="webp" role="radio" aria-checked="false">
+            WebP <span class="toggle-sub">iso-bytes</span>
+          </button>
+          <button class="toggle-btn" data-mode="source" role="radio" aria-checked="false">
+            Source <span class="toggle-sub">ground truth</span>
+          </button>
+        </div>
+      </div>
 
       <div id="gallery-grid" class="gallery-grid">
         <div class="gallery-loading">Loading comparisons…</div>

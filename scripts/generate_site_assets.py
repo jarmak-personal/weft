@@ -125,16 +125,24 @@ def psnr(a: np.ndarray, b: np.ndarray) -> float:
     return 10.0 * math.log10(1.0 / mse)
 
 
-def iso_bytes_jpeg(src_img: Image.Image, target_bytes: int) -> tuple[np.ndarray, int, int, float]:
-    """Return (decoded array, bytes, quality, psnr) at the highest JPEG
-    quality whose encoded size is ≤ target_bytes."""
+def iso_bytes_lossy(
+    src_img: Image.Image,
+    fmt: str,
+    target_bytes: int,
+) -> tuple[np.ndarray, int, int, float]:
+    """Return (decoded array, bytes, quality, psnr) at the highest quality
+    for ``fmt`` (JPEG or WEBP) whose encoded size is ≤ target_bytes."""
     source_arr = np.asarray(src_img)
+    save_kwargs = {
+        "JPEG": {"optimize": True},
+        "WEBP": {"method": 6},
+    }[fmt]
     best = None
     lo, hi = 1, 100
     while lo <= hi:
         mid = (lo + hi) // 2
         buf = BytesIO()
-        src_img.save(buf, "JPEG", quality=mid, optimize=True)
+        src_img.save(buf, fmt, quality=mid, **save_kwargs)
         b = buf.getvalue()
         if len(b) <= target_bytes:
             decoded = np.asarray(Image.open(BytesIO(b)).convert("RGB"))
@@ -144,7 +152,7 @@ def iso_bytes_jpeg(src_img: Image.Image, target_bytes: int) -> tuple[np.ndarray,
             hi = mid - 1
     if best is None:
         buf = BytesIO()
-        src_img.save(buf, "JPEG", quality=1, optimize=True)
+        src_img.save(buf, fmt, quality=1, **save_kwargs)
         b = buf.getvalue()
         decoded = np.asarray(Image.open(BytesIO(b)).convert("RGB"))
         return decoded, len(b), 1, psnr(source_arr, decoded)
@@ -157,7 +165,7 @@ def main() -> None:
     os.makedirs(tmp_dir, exist_ok=True)
 
     fixtures = []
-    totals = {"weft": 0, "jpeg": 0, "png_lossless": 0}
+    totals = {"weft": 0, "jpeg": 0, "webp": 0, "png_lossless": 0}
 
     for src_path in CORPUS:
         if not os.path.exists(src_path):
@@ -208,8 +216,12 @@ def main() -> None:
         weft_out.save(os.path.join(OUT_DIR, f"{name}_weft.png"))
 
         # 3. JPEG at iso-bytes
-        jpeg_arr, jpeg_bytes, jpeg_q, jpeg_psnr = iso_bytes_jpeg(src_img, weft_bytes)
+        jpeg_arr, jpeg_bytes, jpeg_q, jpeg_psnr = iso_bytes_lossy(src_img, "JPEG", weft_bytes)
         Image.fromarray(jpeg_arr).save(os.path.join(OUT_DIR, f"{name}_jpeg.png"))
+
+        # 4. WebP at iso-bytes
+        webp_arr, webp_bytes, webp_q, webp_psnr = iso_bytes_lossy(src_img, "WEBP", weft_bytes)
+        Image.fromarray(webp_arr).save(os.path.join(OUT_DIR, f"{name}_webp.png"))
 
         fixture_data = {
             "name": name,
@@ -228,43 +240,59 @@ def main() -> None:
                 "psnr_db": round(jpeg_psnr, 2),
                 "quality": int(jpeg_q),
             },
+            "webp_iso": {
+                "bytes": int(webp_bytes),
+                "psnr_db": round(webp_psnr, 2),
+                "quality": int(webp_q),
+            },
             "delta_db": round(weft_psnr - jpeg_psnr, 2),
+            "delta_db_vs_webp": round(weft_psnr - webp_psnr, 2),
             "assets": {
                 "source": f"assets/compare/{name}_source.png",
                 "weft": f"assets/compare/{name}_weft.png",
                 "jpeg": f"assets/compare/{name}_jpeg.png",
+                "webp": f"assets/compare/{name}_webp.png",
             },
         }
         fixtures.append(fixture_data)
 
         totals["weft"] += weft_bytes
         totals["jpeg"] += jpeg_bytes
+        totals["webp"] += webp_bytes
         totals["png_lossless"] += png_lossless_bytes
 
         print(
             f"{name:<26} {variant:<18} "
             f"W={weft_bytes/1024:>6.1f}K/{weft_psnr:5.2f}dB  "
             f"J={jpeg_bytes/1024:>6.1f}K/{jpeg_psnr:5.2f}dB  "
-            f"Δ={weft_psnr - jpeg_psnr:+5.2f}dB"
+            f"Wb={webp_bytes/1024:>6.1f}K/{webp_psnr:5.2f}dB  "
+            f"Δj={weft_psnr - jpeg_psnr:+5.2f} Δw={weft_psnr - webp_psnr:+5.2f}"
         )
 
     # Aggregate summary
     n = len(fixtures)
     wins_jpeg = sum(1 for f in fixtures if f["delta_db"] > 0)
+    wins_webp = sum(1 for f in fixtures if f["delta_db_vs_webp"] > 0)
     avg_delta_jpeg = sum(f["delta_db"] for f in fixtures) / max(1, n)
+    avg_delta_webp = sum(f["delta_db_vs_webp"] for f in fixtures) / max(1, n)
     avg_weft_psnr = sum(f["weft"]["psnr_db"] for f in fixtures) / max(1, n)
     avg_jpeg_psnr = sum(f["jpeg_iso"]["psnr_db"] for f in fixtures) / max(1, n)
+    avg_webp_psnr = sum(f["webp_iso"]["psnr_db"] for f in fixtures) / max(1, n)
 
     data = {
         "weft_quality": WEFT_QUALITY,
         "fixture_count": n,
         "wins_jpeg": wins_jpeg,
+        "wins_webp": wins_webp,
         "avg_weft_psnr_db": round(avg_weft_psnr, 2),
         "avg_jpeg_psnr_iso_db": round(avg_jpeg_psnr, 2),
+        "avg_webp_psnr_iso_db": round(avg_webp_psnr, 2),
         "avg_delta_db_vs_jpeg": round(avg_delta_jpeg, 2),
+        "avg_delta_db_vs_webp": round(avg_delta_webp, 2),
         "totals_kb": {
             "weft": round(totals["weft"] / 1024, 1),
             "jpeg_iso": round(totals["jpeg"] / 1024, 1),
+            "webp_iso": round(totals["webp"] / 1024, 1),
             "png_lossless": round(totals["png_lossless"] / 1024, 1),
         },
         "fixtures": fixtures,
@@ -275,12 +303,13 @@ def main() -> None:
         json.dump(data, f, indent=2)
 
     print()
-    print(f"Summary: {wins_jpeg}/{n} iso-byte wins vs JPEG  "
-          f"(avg +{avg_delta_jpeg:.2f} dB)")
+    print(f"Summary: {wins_jpeg}/{n} iso-byte wins vs JPEG (avg {avg_delta_jpeg:+.2f} dB)  "
+          f"| {wins_webp}/{n} vs WebP (avg {avg_delta_webp:+.2f} dB)")
     print(f"Total bytes: Weft={totals['weft']/1024:.1f}K  "
           f"JPEG={totals['jpeg']/1024:.1f}K  "
+          f"WebP={totals['webp']/1024:.1f}K  "
           f"PNG-lossless={totals['png_lossless']/1024:.1f}K")
-    print(f"Assets: {OUT_DIR}/ ({n} fixtures × 3 variants)")
+    print(f"Assets: {OUT_DIR}/ ({n} fixtures × 4 variants)")
     print(f"Data: {DATA_PATH}")
 
 

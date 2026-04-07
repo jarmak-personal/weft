@@ -5,7 +5,9 @@
 //  2. Populate hero stats + benchmark table from the JSON
 //  3. Render the gallery grid (one card per fixture) with interactive
 //     image-comparison sliders
-//  4. Wire the slider drag + touch + keyboard interaction
+//  4. Wire the gallery toggle (JPEG / WebP / Source) so it swaps the
+//     B-side of every slider, plus the delta badge and stat caption
+//  5. Wire the slider drag + touch + keyboard interaction
 //
 // The JSON schema is defined by scripts/generate_site_assets.py.
 
@@ -13,6 +15,50 @@
   "use strict";
 
   const DATA_URL = "assets/bench_data.json";
+
+  // Describes how to render each comparison mode. Each entry maps to the
+  // shape of bench_data.json fields and the labels shown in the UI.
+  const MODES = {
+    jpeg: {
+      assetKey: "jpeg",
+      isoKey: "jpeg_iso",
+      deltaKey: "delta_db",
+      sliderLabel: "JPEG ▶",
+      statLabel: (f) => `JPEG (iso-bytes, q${f.jpeg_iso.quality})`,
+      altText: (f) => `JPEG at iso-bytes: ${f.title}`,
+      // When true, the badge shows Δ = weft − other. When false (e.g. Source
+      // mode), the badge shows the Weft absolute PSNR since comparing
+      // against ground truth doesn't produce a meaningful delta.
+      hasDelta: true,
+    },
+    webp: {
+      assetKey: "webp",
+      isoKey: "webp_iso",
+      deltaKey: "delta_db_vs_webp",
+      sliderLabel: "WebP ▶",
+      statLabel: (f) => `WebP (iso-bytes, q${f.webp_iso.quality})`,
+      altText: (f) => `WebP at iso-bytes: ${f.title}`,
+      hasDelta: true,
+    },
+    source: {
+      assetKey: "source",
+      // No iso key — source is the uncompressed ground truth. Stats show
+      // the source's PNG-lossless byte count (a reference point) and the
+      // "lossless" indicator instead of a PSNR number.
+      isoKey: null,
+      deltaKey: null,
+      sliderLabel: "Source ▶",
+      statLabel: () => "Source (ground truth, lossless)",
+      altText: (f) => `Source: ${f.title}`,
+      hasDelta: false,
+    },
+  };
+
+  const DEFAULT_MODE = "jpeg";
+
+  // Closure state used by the toggle handler.
+  let allFixtures = [];
+  let currentMode = DEFAULT_MODE;
 
   /* ─────────────────────────── fetch + bootstrap ─────────────────── */
 
@@ -33,10 +79,13 @@
       return;
     }
 
+    allFixtures = data.fixtures;
+
     populateHeroStats(data);
-    renderGallery(data.fixtures);
+    renderGallery(allFixtures);
     renderBenchTable(data);
     initSliders();
+    initToggle();
   }
 
   function renderError(msg) {
@@ -81,30 +130,32 @@
     const grid = document.getElementById("gallery-grid");
     if (!grid) return;
 
-    // Sort: biggest positive wins first (most visually striking), then
-    // losses at the end for the honest story.
+    // Sort: biggest positive wins vs JPEG first (most visually striking),
+    // then losses at the end for the honest story. This ordering is
+    // independent of the currently-selected comparison mode — we want the
+    // list order stable even when the user toggles the comparison.
     const sorted = fixtures.slice().sort((a, b) => b.delta_db - a.delta_db);
 
-    const html = sorted.map(buildGalleryCard).join("");
+    const html = sorted.map((f) => buildGalleryCard(f, DEFAULT_MODE)).join("");
     grid.innerHTML = html;
   }
 
-  function buildGalleryCard(f) {
-    const deltaSign = f.delta_db >= 0 ? "+" : "";
-    const deltaClass = f.delta_db >= 0 ? "positive" : "negative";
+  function buildGalleryCard(f, mode) {
+    const modeSpec = MODES[mode];
+    const other = modeSpec.isoKey ? f[modeSpec.isoKey] : null;
+
+    const deltaBadge = buildDeltaBadge(f, modeSpec);
     const weftKb = (f.weft.bytes / 1024).toFixed(1);
-    const jpegKb = (f.jpeg_iso.bytes / 1024).toFixed(1);
+    const bInfo = buildBStats(f, modeSpec);
 
     return `
-      <article class="gallery-card">
+      <article class="gallery-card" data-fixture="${escapeHtml(f.name)}">
         <div class="gallery-header">
           <div class="gallery-meta">
             <h3 class="gallery-title">${escapeHtml(f.title)}</h3>
             <span class="gallery-variant">variant: ${escapeHtml(f.variant)}</span>
           </div>
-          <div class="gallery-delta ${deltaClass}">
-            ${deltaSign}${f.delta_db.toFixed(2)} dB
-          </div>
+          ${deltaBadge}
         </div>
         <p class="gallery-note">${escapeHtml(f.note)}</p>
 
@@ -113,11 +164,14 @@
             <img src="${escapeHtml(f.assets.weft)}" alt="Weft decoded: ${escapeHtml(f.title)}" loading="lazy">
           </div>
           <div class="compare-b">
-            <img src="${escapeHtml(f.assets.jpeg)}" alt="JPEG at iso-bytes: ${escapeHtml(f.title)}" loading="lazy">
+            <img data-role="b-img"
+                 src="${escapeHtml(f.assets[modeSpec.assetKey])}"
+                 alt="${escapeHtml(modeSpec.altText(f))}"
+                 loading="lazy">
           </div>
           <div class="compare-labels">
             <span class="compare-label-a">◀ Weft</span>
-            <span class="compare-label-b">JPEG ▶</span>
+            <span class="compare-label-b" data-role="b-label">${modeSpec.sliderLabel}</span>
           </div>
           <div class="compare-handle" aria-hidden="true"></div>
         </div>
@@ -127,13 +181,114 @@
             <div class="gallery-stat-label">Weft</div>
             <div class="gallery-stat-num"><strong>${weftKb} KB</strong> &middot; ${f.weft.psnr_db.toFixed(2)} dB</div>
           </div>
-          <div class="gallery-stat">
-            <div class="gallery-stat-label">JPEG (iso-bytes, q${f.jpeg_iso.quality})</div>
-            <div class="gallery-stat-num"><strong>${jpegKb} KB</strong> &middot; ${f.jpeg_iso.psnr_db.toFixed(2)} dB</div>
+          <div class="gallery-stat" data-role="b-stat">
+            <div class="gallery-stat-label" data-role="b-stat-label">${escapeHtml(modeSpec.statLabel(f))}</div>
+            <div class="gallery-stat-num" data-role="b-stat-num">${bInfo}</div>
           </div>
         </div>
       </article>
     `;
+  }
+
+  function buildDeltaBadge(f, modeSpec) {
+    if (!modeSpec.hasDelta) {
+      // Source mode: show Weft's absolute PSNR as the "headline" number
+      return `
+        <div class="gallery-delta" data-role="delta">
+          ${f.weft.psnr_db.toFixed(2)} dB
+        </div>
+      `;
+    }
+    const delta = f[modeSpec.deltaKey];
+    const sign = delta >= 0 ? "+" : "";
+    const cls = delta >= 0 ? "positive" : "negative";
+    return `
+      <div class="gallery-delta ${cls}" data-role="delta">
+        ${sign}${delta.toFixed(2)} dB
+      </div>
+    `;
+  }
+
+  function buildBStats(f, modeSpec) {
+    if (modeSpec.isoKey) {
+      const entry = f[modeSpec.isoKey];
+      const kb = (entry.bytes / 1024).toFixed(1);
+      return `<strong>${kb} KB</strong> &middot; ${entry.psnr_db.toFixed(2)} dB`;
+    }
+    // Source mode: show the PNG-lossless size (the honest "source bytes"
+    // reference) and a "lossless" indicator instead of a PSNR number.
+    const kb = (f.source_bytes / 1024).toFixed(1);
+    return `<strong>${kb} KB</strong> &middot; lossless`;
+  }
+
+  /* ─────────────────────────── gallery toggle ─────────────────────── */
+
+  function initToggle() {
+    const buttons = document.querySelectorAll(".gallery-toggle .toggle-btn");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const mode = btn.dataset.mode;
+        if (!mode || mode === currentMode) return;
+        setMode(mode, buttons);
+      });
+    });
+  }
+
+  function setMode(mode, buttons) {
+    if (!MODES[mode]) return;
+    currentMode = mode;
+    const modeSpec = MODES[mode];
+
+    // Update toggle button states
+    if (buttons) {
+      buttons.forEach((b) => {
+        const active = b.dataset.mode === mode;
+        b.classList.toggle("active", active);
+        b.setAttribute("aria-checked", active ? "true" : "false");
+      });
+    }
+
+    // Look up each card by fixture name and update the B-side
+    const fixtureByName = new Map(allFixtures.map((f) => [f.name, f]));
+    const cards = document.querySelectorAll(".gallery-card");
+
+    cards.forEach((card) => {
+      const name = card.dataset.fixture;
+      const f = fixtureByName.get(name);
+      if (!f) return;
+
+      // B image
+      const bImg = card.querySelector('[data-role="b-img"]');
+      if (bImg) {
+        bImg.src = f.assets[modeSpec.assetKey];
+        bImg.alt = modeSpec.altText(f);
+      }
+
+      // B slider label
+      const bLabel = card.querySelector('[data-role="b-label"]');
+      if (bLabel) bLabel.textContent = modeSpec.sliderLabel;
+
+      // Delta badge
+      const delta = card.querySelector('[data-role="delta"]');
+      if (delta) {
+        delta.classList.remove("positive", "negative");
+        if (modeSpec.hasDelta) {
+          const d = f[modeSpec.deltaKey];
+          const sign = d >= 0 ? "+" : "";
+          delta.classList.add(d >= 0 ? "positive" : "negative");
+          delta.textContent = `${sign}${d.toFixed(2)} dB`;
+        } else {
+          // Source mode: show Weft's absolute PSNR, no sign/color
+          delta.textContent = `${f.weft.psnr_db.toFixed(2)} dB`;
+        }
+      }
+
+      // B stat label + numbers
+      const bStatLabel = card.querySelector('[data-role="b-stat-label"]');
+      if (bStatLabel) bStatLabel.textContent = modeSpec.statLabel(f);
+      const bStatNum = card.querySelector('[data-role="b-stat-num"]');
+      if (bStatNum) bStatNum.innerHTML = buildBStats(f, modeSpec);
+    });
   }
 
   /* ─────────────────────────── benchmark table ───────────────────── */

@@ -2,12 +2,16 @@
   "weft_quality": 75,
   "fixture_count": 14,
   "wins_jpeg": 10,
+  "wins_webp": 11,
   "avg_weft_psnr_db": 43.75,
   "avg_jpeg_psnr_iso_db": 32.12,
+  "avg_webp_psnr_iso_db": 37.97,
   "avg_delta_db_vs_jpeg": 11.63,
+  "avg_delta_db_vs_webp": 5.78,
   "totals_kb": {
     "weft": 243.0,
     "jpeg_iso": 240.4,
+    "webp_iso": 232.2,
     "png_lossless": 1259.8
   },
   "fixtures": [
@@ -20,7 +24,7 @@
       "variant": "palette-64",
       "source_bytes": 43965,
       "weft": {
-        "bytes": 11871,
+        "bytes": 11872,
         "psnr_db": 43.57
       },
       "jpeg_iso": {
@@ -28,11 +32,18 @@
         "psnr_db": 25.45,
         "quality": 5
       },
+      "webp_iso": {
+        "bytes": 11844,
+        "psnr_db": 31.92,
+        "quality": 6
+      },
       "delta_db": 18.12,
+      "delta_db_vs_webp": 11.66,
       "assets": {
         "source": "assets/compare/hard-edges_source.png",
         "weft": "assets/compare/hard-edges_weft.png",
-        "jpeg": "assets/compare/hard-edges_jpeg.png"
+        "jpeg": "assets/compare/hard-edges_jpeg.png",
+        "webp": "assets/compare/hard-edges_webp.png"
       }
     },
     {
@@ -52,11 +63,18 @@
         "psnr_db": 26.76,
         "quality": 9
       },
+      "webp_iso": {
+        "bytes": 6726,
+        "psnr_db": 32.97,
+        "quality": 23
+      },
       "delta_db": 20.89,
+      "delta_db_vs_webp": 14.67,
       "assets": {
         "source": "assets/compare/synth-chart_source.png",
         "weft": "assets/compare/synth-chart_weft.png",
-        "jpeg": "assets/compare/synth-chart_jpeg.png"
+        "jpeg": "assets/compare/synth-chart_jpeg.png",
+        "webp": "assets/compare/synth-chart_webp.png"
       }
     },
     {
@@ -76,11 +94,18 @@
         "psnr_db": 25.16,
         "quality": 1
       },
+      "webp_iso": {
+        "bytes": 2240,
+        "psnr_db": 43.57,
+        "quality": 87
+      },
       "delta_db": 22.81,
+      "delta_db_vs_webp": 4.4,
       "assets": {
         "source": "assets/compare/synth-diagram_source.png",
         "weft": "assets/compare/synth-diagram_weft.png",
-        "jpeg": "assets/compare/synth-diagram_jpeg.png"
+        "jpeg": "assets/compare/synth-diagram_jpeg.png",
+        "webp": "assets/compare/synth-diagram_webp.png"
       }
     },
     {
@@ -92,7 +117,7 @@
       "variant": "gradient",
       "source_bytes": 3482,
       "weft": {
-        "bytes": 5014,
+        "bytes": 5015,
         "psnr_db": 47.8
       },
       "jpeg_iso": {
@@ -100,11 +125,18 @@
         "psnr_db": 26.76,
         "quality": 16
       },
+      "webp_iso": {
+        "bytes": 4968,
+        "psnr_db": 34.13,
+        "quality": 60
+      },
       "delta_db": 21.05,
+      "delta_db_vs_webp": 13.67,
       "assets": {
         "source": "assets/compare/synth-icons_source.png",
         "weft": "assets/compare/synth-icons_weft.png",
-        "jpeg": "assets/compare/synth-icons_jpeg.png"
+        "jpeg": "assets/compare/synth-icons_jpeg.png",
+        "webp": "assets/compare/synth-icons_webp.png"
       }
     },
     {
@@ -124,11 +156,18 @@
         "psnr_db": 24.1,
         "quality": 51
       },
+      "webp_iso": {
+        "bytes": 15078,
+        "psnr_db": 25.25,
+        "quality": 70
+      },
       "delta_db": 2.94,
+      "delta_db_vs_webp": 1.8,
       "assets": {
         "source": "assets/compare/synth-mandelbrot_source.png",
         "weft": "assets/compare/synth-mandelbrot_weft.png",
-        "jpeg": "assets/compare/synth-mandelbrot_jpeg.png"
+        "jpeg": "assets/compare/synth-mandelbrot_jpeg.png",
+        "webp": "assets/compare/synth-mandelbrot_webp.png"
       }
     },
     {
@@ -140,7 +179,7 @@
       "variant": "hybrid-dct-tight",
       "source_bytes": 257853,
       "weft": {
-        "bytes": 49579,
+        "bytes": 49580,
         "psnr_db": 39.16
       },
       "jpeg_iso": {
@@ -148,11 +187,18 @@
         "psnr_db": 44.49,
         "quality": 89
       },
+      "webp_iso": {
+        "bytes": 46972,
+        "psnr_db": 44.25,
+        "quality": 94
+      },
       "delta_db": -5.33,
+      "delta_db_vs_webp": -5.09,
       "assets": {
         "source": "assets/compare/synth-noise-texture_source.png",
         "weft": "assets/compare/synth-noise-texture_weft.png",
-        "jpeg": "assets/compare/synth-noise-texture_jpeg.png"
+        "jpeg": "assets/compare/synth-noise-texture_jpeg.png",
+        "webp": "assets/compare/synth-noise-texture_webp.png"
       }
     },
     {
@@ -172,11 +218,18 @@
         "psnr_db": 42.91,
         "quality": 85
       },
+      "webp_iso": {
+        "bytes": 9016,
+        "psnr_db": 44.49,
+        "quality": 100
+      },
       "delta_db": -1.67,
+      "delta_db_vs_webp": -3.25,
       "assets": {
         "source": "assets/compare/synth-photo-landscape_source.png",
         "weft": "assets/compare/synth-photo-landscape_weft.png",
-        "jpeg": "assets/compare/synth-photo-landscape_jpeg.png"
+        "jpeg": "assets/compare/synth-photo-landscape_jpeg.png",
+        "webp": "assets/compare/synth-photo-landscape_webp.png"
       }
     },
     {
@@ -188,7 +241,7 @@
       "variant": "hybrid-dct-tight",
       "source_bytes": 568728,
       "weft": {
-        "bytes": 77029,
+        "bytes": 77028,
         "psnr_db": 33.29
       },
       "jpeg_iso": {
@@ -196,11 +249,18 @@
         "psnr_db": 33.77,
         "quality": 85
       },
+      "webp_iso": {
+        "bytes": 74998,
+        "psnr_db": 36.01,
+        "quality": 90
+      },
       "delta_db": -0.49,
+      "delta_db_vs_webp": -2.73,
       "assets": {
         "source": "assets/compare/synth-photo-natural_source.png",
         "weft": "assets/compare/synth-photo-natural_weft.png",
-        "jpeg": "assets/compare/synth-photo-natural_jpeg.png"
+        "jpeg": "assets/compare/synth-photo-natural_jpeg.png",
+        "webp": "assets/compare/synth-photo-natural_webp.png"
       }
     },
     {
@@ -212,7 +272,7 @@
       "variant": "gradient",
       "source_bytes": 4819,
       "weft": {
-        "bytes": 3097,
+        "bytes": 3096,
         "psnr_db": 42.76
       },
       "jpeg_iso": {
@@ -220,11 +280,18 @@
         "psnr_db": 23.71,
         "quality": 1
       },
+      "webp_iso": {
+        "bytes": 6028,
+        "psnr_db": 31.12,
+        "quality": 1
+      },
       "delta_db": 19.05,
+      "delta_db_vs_webp": 11.64,
       "assets": {
         "source": "assets/compare/synth-pixel-sprite_source.png",
         "weft": "assets/compare/synth-pixel-sprite_weft.png",
-        "jpeg": "assets/compare/synth-pixel-sprite_jpeg.png"
+        "jpeg": "assets/compare/synth-pixel-sprite_jpeg.png",
+        "webp": "assets/compare/synth-pixel-sprite_webp.png"
       }
     },
     {
@@ -244,11 +311,18 @@
         "psnr_db": 22.81,
         "quality": 1
       },
+      "webp_iso": {
+        "bytes": 2288,
+        "psnr_db": 40.52,
+        "quality": 77
+      },
       "delta_db": 25.31,
+      "delta_db_vs_webp": 7.6,
       "assets": {
         "source": "assets/compare/synth-region-map_source.png",
         "weft": "assets/compare/synth-region-map_weft.png",
-        "jpeg": "assets/compare/synth-region-map_jpeg.png"
+        "jpeg": "assets/compare/synth-region-map_jpeg.png",
+        "webp": "assets/compare/synth-region-map_webp.png"
       }
     },
     {
@@ -260,7 +334,7 @@
       "variant": "gradient",
       "source_bytes": 4186,
       "weft": {
-        "bytes": 8151,
+        "bytes": 8152,
         "psnr_db": 48.6
       },
       "jpeg_iso": {
@@ -268,11 +342,18 @@
         "psnr_db": 29.96,
         "quality": 25
       },
+      "webp_iso": {
+        "bytes": 8116,
+        "psnr_db": 35.65,
+        "quality": 77
+      },
       "delta_db": 18.65,
+      "delta_db_vs_webp": 12.95,
       "assets": {
         "source": "assets/compare/synth-shapes_source.png",
         "weft": "assets/compare/synth-shapes_weft.png",
-        "jpeg": "assets/compare/synth-shapes_jpeg.png"
+        "jpeg": "assets/compare/synth-shapes_jpeg.png",
+        "webp": "assets/compare/synth-shapes_webp.png"
       }
     },
     {
@@ -292,11 +373,18 @@
         "psnr_db": 49.7,
         "quality": 89
       },
+      "webp_iso": {
+        "bytes": 12884,
+        "psnr_db": 48.45,
+        "quality": 96
+      },
       "delta_db": -0.23,
+      "delta_db_vs_webp": 1.03,
       "assets": {
         "source": "assets/compare/synth-smooth-gradient_source.png",
         "weft": "assets/compare/synth-smooth-gradient_weft.png",
-        "jpeg": "assets/compare/synth-smooth-gradient_jpeg.png"
+        "jpeg": "assets/compare/synth-smooth-gradient_jpeg.png",
+        "webp": "assets/compare/synth-smooth-gradient_webp.png"
       }
     },
     {
@@ -316,11 +404,18 @@
         "psnr_db": 29.06,
         "quality": 23
       },
+      "webp_iso": {
+        "bytes": 8638,
+        "psnr_db": 37.99,
+        "quality": 62
+      },
       "delta_db": 20.47,
+      "delta_db_vs_webp": 11.53,
       "assets": {
         "source": "assets/compare/synth-terminal_source.png",
         "weft": "assets/compare/synth-terminal_weft.png",
-        "jpeg": "assets/compare/synth-terminal_jpeg.png"
+        "jpeg": "assets/compare/synth-terminal_jpeg.png",
+        "webp": "assets/compare/synth-terminal_webp.png"
       }
     },
     {
@@ -340,11 +435,18 @@
         "psnr_db": 44.98,
         "quality": 89
       },
+      "webp_iso": {
+        "bytes": 27932,
+        "psnr_db": 45.24,
+        "quality": 100
+      },
       "delta_db": 1.29,
+      "delta_db_vs_webp": 1.04,
       "assets": {
         "source": "assets/compare/synthetic-render-1024_source.png",
         "weft": "assets/compare/synthetic-render-1024_weft.png",
-        "jpeg": "assets/compare/synthetic-render-1024_jpeg.png"
+        "jpeg": "assets/compare/synthetic-render-1024_jpeg.png",
+        "webp": "assets/compare/synthetic-render-1024_webp.png"
       }
     }
   ]
